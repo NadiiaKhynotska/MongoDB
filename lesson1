@@ -1,0 +1,127 @@
+use my_test_db
+
+db.users.insertOne({name: 'Max', age: 15})
+db.users.insertMany([
+    {name: 'Petya', age: 30},
+    {name: 'Nadin', age: 35},
+    {name: 'Masha', age: 15},
+])
+
+db.users.find()
+
+db.users.drop()
+
+db.users.find({gender: 'female'})
+db.users.find({gender: 'female', rating: 2})
+db.users.find({_id: ObjectId('6498a7b79c8a4334d33f837e')})
+db.users.find(
+    {gender: 'female', rating: 2},
+    {name: true, age: 1, _id: 0})
+
+db.users.find({
+    $or: [
+        {rating: 2},
+        {rating: 5},
+        {age: 12}
+    ]
+})
+
+db.users.find({
+    $and: [
+        {gender: 'female'},
+        {rating: 2}
+    ]
+},
+    {gender: 1, rating: 1, age: 1})
+
+db.users.find({age: {$in: [12, 25, 35, 5, 88]}}, {age: 1})
+
+db.users.find({
+    age: {
+        $not: {
+            $in: [12, 25, 35, 5, 8]
+        }
+    }
+},
+    {age: 1})
+
+db.users.find({rating: {$gt: 2}}, {rating: 1}) //більший ніж $gt
+
+db.users.find({rating: {$gte: 2}}, {rating: 1}) //більше рівно  $gte
+
+db.users.find({rating: {$lt: 4}}, {rating: 1}) //менше ніж $lt
+db.users.find({rating: {$lte: 4}}, {rating: 1}) //менше рівно $lte
+db.users.find({rating: {$ne: 4}}, {rating: 1}) //не рівно $ne
+db.users.find({rating: {$eq: 4}}, {rating: 1}) //рівно $eq
+
+
+db.users.find({name: /^a/}) //
+db.users.find({name: /^A/}, {name: 1}) // всі імена які починаються з А чутливий до регістру
+db.users.find({name: /^a/i}, {name: 1})// всі імена які починаються з а/і - прибираємо чутливість до регістру
+db.users.find({name: /a$/i}, {name: 1}) // всі імена які закінчуються на а знак $викор для позначення що кінець
+db.users.find({name: /.*l.*/i}, {name: 1}) // всі імена де в середині слова є L не важливо де
+db.users.find({name: /.{2}t/i}, {name: 1}) // крапка будь-я символ {2}два пропускаю і третій шукаю t
+db.users.find({name: /^k.*a$/i}, {name: 1}) // ^початок строки з к .*не важливо що в середині і закінчується на а$
+
+db.users.find({}, {rating: 1}).sort({rating: 1}) //сортування по рейтингу від меншого до більшого
+
+db.users.find({}, {rating: 1}).sort({rating: -1}) //сортування від більшго до меншого за допомогою -1
+
+db.users.find({}, {rating: 1, age: 1}).sort({rating: -1, age: -1}) //сортування і по рейтингу і по віку від більшого до меншого
+
+db.users.find({}, {rating: 1, age: 1}).sort({rating: -1, age: -1}).limit(2) //вибрати лише два перших
+
+db.users.find({}, {rating: 1, age: 1}).sort({rating: -1, age: -1}).limit(2).skip(1) //скіпаю перший і другий третій у порядку сортування виводжу
+
+db.users.updateOne(
+    {_id: ObjectId('6498a7b79c8a4334d33f8378')},// поле по якому шукаємо обєкт який маємо змінити
+    {$set: {name: 'Poulinio'}}// поле у якому вказуємо що саме маємо змінити через оператор сет
+    )
+
+db.users.updateMany(
+    {gender: 'male'},
+    {$set: {gender: 'animal'}}
+    )
+
+db.users.updateOne(
+    {_id: ObjectId('6498a7b79c8a4334d33f8378')},
+    {$set: {status: true}}             //добавляємо додоаткове поле
+    )
+
+db.users.updateOne(
+    {_id: ObjectId('6498a7b79c8a4334d33f8378')},
+    {$unset: {status: 1}}             //видаляємо поле і вказуємо саме яке поле за допомогою 1 або 0 чи тру фолс
+    )
+
+// =====================робота з масивами в бд========================
+db.users.find({parents: {$exists: 0}}) //шукає безпосередньо чи є наявне поле в обєкті
+
+db.users.find({parents: null}) // виведе всі обєкти і ті в яких нема поля і в яких є поле але зі значенням нал
+
+db.users.find({parents:{$size:1}}) //шукає лише ті які відпоівідають умові розміру масиву через оператор сайз
+
+db.users.find({studying: 'java'})  //пошук по конкретному елементу масиу при чому не важливо де в масиві зназодиться елемент
+
+db.users.updateOne(
+    {_id: ObjectId('6498a7b79c8a4334d33f8378')},
+    {$push:{studying: 'python'}}   //пушимо додатковий елемент масиву конкретному юзеру по айді
+    )
+
+
+db.users.updateOne(
+    {_id: ObjectId('6498a7b79c8a4334d33f8378')},
+    {$pull:{parents: 'Masha'}}   // видаляємо елемент масиву за домопомгою оператора пул
+    )
+
+db.users.find({'studying.1': 'java'}) //пошук по індексу елемента в масиві - вивести всі де джава з індексом1
+
+db.users.insertOne({
+    car: 'fiat',
+    year: 2007
+})
+
+db.users.find().sort({rating:1})
+
+db.users.deleteOne({_id: ObjectId('64995b574a9e12270cdedb05')})
+db.users.deleteOne({_id: ObjectId('64995b7a4a9e12270cdedb07')})
+db.users.find()
