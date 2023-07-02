@@ -1,0 +1,104 @@
+db.students.find({
+    lessons: {$all: ['mathematics', 'english']}
+})
+
+db.students.find({
+    'lessons.1': "mathematics" //пошуку по інтдексу елемента в масиві
+})
+
+db.students.findOne({
+    'lessons.1': "mathematics"
+}).name  //пошук першого по умові (індекс елементу в масиві) але виведено лише імя
+
+db.students.find({}, {lessons: {$slice: 2}, lessons: 1, _id: 0})
+db.students.find({lessons: {$size: 3}}, {lessons: 1, _id: 0})
+
+db.students.updateOne(
+    {_id: ObjectId("649dbd24a50a0e268ce44cdc")},
+    {$push: {lessons: 'css'}}
+    )
+
+db.students.find({
+    _id: ObjectId("649dbd24a50a0e268ce44cdc")
+})
+db.students.updateOne(
+    {_id: ObjectId("649dbd24a50a0e268ce44cdc")},
+    {$pull: {lessons: 'mathematics'}} //видалення елементу масиву по значенню
+    )
+
+db.students.updateOne(
+    {_id: ObjectId("649dbd24a50a0e268ce44cdc")},
+    {$unset: {'lessons.4': 1}} // видалення по індексу, встановлюється знач нал
+    )
+
+db.students.updateOne(
+    {_id: ObjectId("649dbd24a50a0e268ce44cdc")},
+    {$pull: {lessons: null}} // видалення значення нал з масиву
+    )
+
+db.students.updateOne(
+    {_id: ObjectId("649dbd24a50a0e268ce44cdc")},
+    {$pop: {lessons: 1}} // видалення елементу масиву з кінця
+    )
+
+
+db.students.updateOne(
+    {_id: ObjectId("649dbd24a50a0e268ce44cdc")},
+    {$pop: {lessons: -1}} // видалення едлементу масиву з початку
+    )
+
+db.students.updateOne(
+    {_id: ObjectId("649dbd24a50a0e268ce44cdc")},
+    {$addToSet: {lessons: 'html'}} //додає тільки унікальні значення в масив без повторів
+    )
+
+db.students.updateOne(
+    {_id: ObjectId("649dbd24a50a0e268ce44cdc")},
+    {$push: {lessons: ['css', 'html', 'sass']}} //додає підмасив значень
+    )
+
+db.students.updateOne(
+    {_id: ObjectId("649dbd24a50a0e268ce44cdc")},
+    {$push: {lessons: {$each: ['css', 'html', 'sass']}}} //додає кілька значень в уже існуючий масив
+    )
+
+db.students.updateOne(
+    {_id: ObjectId("649dbd24a50a0e268ce44cdc")},
+    {$addToSet: {lessons: {$each: ['css', 'html', 'less']}}} //додає кілька значень при цьому без повтроень адд ту сет
+    )
+
+db.students.updateOne(
+    {_id: ObjectId("649dbd24a50a0e268ce44cdc")},
+    {$set: {'lessons.$[]': 'js'}} //Доступ до всіх елементів масиву та заміна їх на однакове значення js
+    )
+
+db.students.updateOne(
+    {_id: ObjectId("649dbd24a50a0e268ce44cdc")},
+    {$set: {'lessons.$[item]': 'java script'}}, //введення змінної айтем із наченням джава скріпт
+    {arrayFilters: [{item: 'js'}]}//Фільтрування масиву замість значення джеес встановлення значення айтем
+    )
+
+db.students.aggregate([
+    {
+        $addFields: {
+            lessonsCount: {
+                $size: '$lessons'//додання додаткового поля знаення якого розмір масиву лесонс
+            }
+        }
+    },
+    {
+        $match:{
+            lessonsCount:{$lte:3}// дає змогу далі сортувати або вибирати більше менше від відподного знач
+        }
+    },
+    {
+        $sort:{
+            lessonsCount:1
+        }
+    },
+    {
+        $project:{
+            lessonsCount:0 // у фінальному виведенні вимикається значення яке ввели на самому початку
+        }
+    }
+])
