@@ -1,0 +1,87 @@
+db.students.find()
+db.teacher.find()
+
+db.teacher.aggregate([
+    {
+        $group: {
+            _id: '$lesson',
+            teacherCount: {$sum: 1},
+            min: {$min: '$payment'},
+            max: {$max: '$payment'},
+            avg: {$avg: '$payment'},
+            sumMoney: {$sum: '$payment'}
+        }
+    }
+])
+
+db.teacher.aggregate([
+    {
+        $group: {
+            _id: '$lesson',
+            teacherCount: {$sum: 1}
+        }
+    },
+    {
+        $sort:{teacherCount: 1        }
+    },
+    {
+        $addFields:{
+            lesson: '$_id'
+        }
+    },
+    {
+        $project:{
+            _id:0
+        }
+    }
+])
+
+db.teacher.aggregate([
+    {
+        $match:{
+            class_curator: {$lt:4}
+        }
+    },
+    {
+        $lookup:{
+            from: 'students',
+            localField: 'class_curator',
+            foreignField: 'class',
+            as: 'MyStudents'
+        }
+    },
+    {
+        $sort: {class_curator: -1}
+    },
+    {
+        $limit:1
+    },
+    {
+        $unwind: '$MyStudents'
+    },
+    {
+        $unwind: '$MyStudents.parents'
+    },
+    {
+        $match:{
+            'MyStudents.parents.profession':'doctor'}
+    },
+    {
+        $count:'DoctorCount'
+    }
+
+])
+
+db.students.aggregate([
+    {
+        $unwind: '$parents'
+    },
+    {
+        $match:{
+            'parents.profession': 'programmer'
+        }
+    },
+    {
+        $count: 'Count of programmer'
+    }
+])
